@@ -1,3 +1,5 @@
+import { signaling } from "./signaling";
+
 const myVideo = document.getElementById("my-video") as HTMLVideoElement;
 const otherVideo = document.getElementById("other-video") as HTMLVideoElement;
 
@@ -62,9 +64,13 @@ receiveICE.addEventListener("click", async () => {
 });
 
 (async () => {
+  signaling();
+
   const mediaStream = await navigator.mediaDevices.getUserMedia({
     video: true,
   });
+
   myVideo.srcObject = mediaStream;
+
   mediaStream.getTracks().forEach((track) => peer.addTrack(track, mediaStream));
 })();
