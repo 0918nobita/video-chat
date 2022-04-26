@@ -7,6 +7,7 @@ const reqHandler: Handler = (req) => {
   const { socket: ws, response } = Deno.upgradeWebSocket(req);
   ws.addEventListener("open", () => {
     console.log("Connected to client");
+    ws.send(JSON.stringify({ type: "identity", id: crypto.randomUUID() }));
   });
   ws.addEventListener("message", (event) => {
     console.log("Message from client:", event.data);
