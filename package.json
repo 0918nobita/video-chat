@@ -1,0 +1,23 @@
+{
+  "name": "webrtc",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0918nobita/webrtc.git"
+  },
+  "author": "Kodai Matsumoto (nobita.0918@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/0918nobita/webrtc/issues"
+  },
+  "homepage": "https://github.com/0918nobita/webrtc#readme",
+  "devDependencies": {
+    "typescript": "4.6.3",
+    "vite": "2.9.5"
+  }
+}

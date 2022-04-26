@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" href="data:,">
+    <title>WebRTC</title>
+  </head>
+  <body>
+    <div>
+      <button id="offer-sdp">Offer SDP</button>
+      <button id="receive-sdp">Receive SDP</button>
+      <button id="receive-ice">Receive ICE</button>
+    </div>
+    <video id="my-video" autoplay style="width: 40%;"></video>
+    <video id="other-video" autoplay style="width: 40%;"></video>
+    <div>
+      <label>SDP Output</label>
+      <textarea id="sdp-output" readonly style="max-width: 100%; width: 100%; height: 10em;"></textarea>
+      <label>SDP Input</label>
+      <textarea id="sdp-input" style="max-width: 100%; width: 100%; height: 10em;"></textarea>
+      <label>ICE Output</label>
+      <textarea id="ice-output" readonly style="max-width: 100%; width: 100%; height: 10em;"></textarea>
+      <label>ICE Input</label>
+      <textarea id="ice-input" style="max-width: 100%; width: 100%; height: 10em;"></textarea>
+    </div>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>
