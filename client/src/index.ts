@@ -1,4 +1,4 @@
-import { signaling } from "./signaling";
+import { setupWebSocket } from "./ws";
 
 const myVideo = document.getElementById("my-video") as HTMLVideoElement;
 const otherVideo = document.getElementById("other-video") as HTMLVideoElement;
@@ -64,7 +64,7 @@ receiveICE.addEventListener("click", async () => {
 });
 
 (async () => {
-  signaling();
+  setupWebSocket();
 
   const mediaStream = await navigator.mediaDevices.getUserMedia({
     video: true,
