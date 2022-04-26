@@ -1,4 +1,5 @@
 {
+  "extends": "@tsconfig/svelte",
   "compilerOptions": {
     /* このファイルの詳細については、https://aka.ms/tsconfig.json をご覧ください */
 
@@ -24,7 +25,7 @@
     // "useDefineForClassFields": true,                  /* ECMAScript 標準準拠クラス フィールドを生成します。 */
 
     /* モジュール */
-    "module": "commonjs",                                /* 生成済みのモジュール コードを指定します。 */
+    "module": "esnext",                                /* 生成済みのモジュール コードを指定します。 */
     // "rootDir": "./",                                  /* ソース ファイル内のルート フォルダーを指定します。 */
     // "moduleResolution": "node",                       /* TypeScript を使用して、指定されたモジュール指定子でファイルを検索する方法を指定します。 */
     // "baseUrl": "./",                                  /* 非相対モジュール名を解決するための基本ディレクトリを指定します。 */
