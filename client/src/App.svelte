@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import ClientList from "./ClientList.svelte";
-  import Controls from "./Controls.svelte";
   import InputTextArea from "./InputTextArea.svelte";
   import OutputTextArea from "./OutputTextArea.svelte";
   import { initWebRTC } from "./webrtc";
@@ -78,8 +77,15 @@
 </script>
 
 <main>
-  <ClientList clients={["aaa", "bbb", "ccc"]} />
-  <Controls {offerSDP} {receiveSDP} {receiveICE} />
+  <ClientList
+    clients={["aaa", "bbb", "ccc"]}
+    on:clientSelected={(ev) => console.log("Client selected:", ev.detail)}
+  />
+  <div>
+    <button on:click={offerSDP}>Offer SDP</button>
+    <button on:click={receiveSDP}>Receive SDP</button>
+    <button on:click={receiveICE}>Receive ICE</button>
+  </div>
   <video autoplay bind:this={myVideo}>
     <track kind="captions" />
   </video>

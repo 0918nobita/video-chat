@@ -1,10 +1,18 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
+
   export let clients: string[];
+
+  const dispatch = createEventDispatcher<{ clientSelected: string }>();
+
+  const handleClick = (client: string) => () => {
+    dispatch("clientSelected", client);
+  };
 </script>
 
 <ul>
   {#each clients as client}
-    <li>{client}</li>
+    <li on:click={handleClick(client)}>{client}</li>
   {/each}
 </ul>
 
