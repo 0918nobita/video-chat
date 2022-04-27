@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import ClientList from "./ClientList.svelte";
   import Controls from "./Controls.svelte";
   import InputTextArea from "./InputTextArea.svelte";
   import OutputTextArea from "./OutputTextArea.svelte";
@@ -77,6 +78,7 @@
 </script>
 
 <main>
+  <ClientList clients={["aaa", "bbb", "ccc"]} />
   <Controls {offerSDP} {receiveSDP} {receiveICE} />
   <video autoplay bind:this={myVideo}>
     <track kind="captions" />
