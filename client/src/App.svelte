@@ -1,5 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Controls from "./Controls.svelte";
+  import InputTextArea from "./InputTextArea.svelte";
+  import OutputTextArea from "./OutputTextArea.svelte";
+  import { initWebRTC } from "./webrtc";
   import { setupWebSocket } from "./ws";
 
   let myVideo: HTMLVideoElement;
@@ -10,34 +14,25 @@
   let iceOutput = "";
   let iceInput = "";
 
-  let peer: RTCPeerConnection;
+  let peer: RTCPeerConnection | null = null;
+
+  const iceCandidates: RTCIceCandidate[] = [];
+
+  const handleICECandidate = (event: RTCPeerConnectionIceEvent): void => {
+    if (event.candidate === null) return;
+    iceCandidates.push(event.candidate);
+    iceOutput = JSON.stringify(iceCandidates, null, 2);
+  };
+
+  const handleTrack = (event: RTCTrackEvent): void => {
+    if (otherVideo === null) return;
+    otherVideo.srcObject = event.streams[0]!;
+  };
 
   onMount(async () => {
-    const iceCandidates: RTCIceCandidate[] = [];
-
-    peer = new RTCPeerConnection({
-      iceServers: [
-        {
-          urls: "stun:openrelay.metered.ca:80",
-        },
-        {
-          urls: "turn:openrelay.metered.ca:443?transport=tcp",
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-      ],
-    });
-
-    peer.addEventListener("icecandidate", (event) => {
-      if (event.candidate === null) return;
-      iceCandidates.push(event.candidate);
-      iceOutput = JSON.stringify(iceCandidates, null, 2);
-    });
-
-    peer.addEventListener("track", (event) => {
-      if (otherVideo === null) return;
-      otherVideo.srcObject = event.streams[0]!;
-    });
+    peer = initWebRTC();
+    peer.addEventListener("icecandidate", handleICECandidate);
+    peer.addEventListener("track", handleTrack);
 
     setupWebSocket();
 
@@ -47,20 +42,22 @@
 
     myVideo.srcObject = mediaStream;
 
-    mediaStream
-      .getTracks()
-      .forEach((track) => peer.addTrack(track, mediaStream));
+    for (const track of mediaStream.getTracks()) {
+      peer.addTrack(track, mediaStream);
+    }
   });
 
-  async function offerSDP() {
+  const offerSDP = async (): Promise<void> => {
+    if (peer === null) return;
     const sessionDesc = await peer.createOffer({
       offerToReceiveVideo: true,
     });
     await peer.setLocalDescription(sessionDesc);
     sdpOutput = JSON.stringify(sessionDesc, null, 2);
-  }
+  };
 
-  async function receiveSDP() {
+  const receiveSDP = async (): Promise<void> => {
+    if (peer === null) return;
     const sessionDesc = JSON.parse(sdpInput);
     await peer.setRemoteDescription(sessionDesc);
     if (sessionDesc.type === "offer") {
@@ -68,52 +65,35 @@
       await peer.setLocalDescription(newSessionDesc);
       sdpOutput = JSON.stringify(newSessionDesc, null, 2);
     }
-  }
+  };
 
-  async function receiveICE() {
+  const receiveICE = async (): Promise<void> => {
+    if (peer === null) return;
     const candidates: RTCIceCandidateInit[] = JSON.parse(iceInput);
     for (const candidate of candidates) {
       await peer.addIceCandidate(candidate);
     }
-  }
+  };
 </script>
 
 <main>
-  <div>
-    <button id="offer-sdp" on:click={offerSDP}>Offer SDP</button>
-    <button id="receive-sdp" on:click={receiveSDP}>Receive SDP</button>
-    <button id="receive-ice" on:click={receiveICE}>Receive ICE</button>
-  </div>
-  <video id="my-video" autoplay bind:this={myVideo}>
+  <Controls {offerSDP} {receiveSDP} {receiveICE} />
+  <video autoplay bind:this={myVideo}>
     <track kind="captions" />
   </video>
-  <video id="other-video" autoplay bind:this={otherVideo}>
+  <video autoplay bind:this={otherVideo}>
     <track kind="captions" />
   </video>
   <div>
-    <label for="sdp-output">SDP Output</label>
-    <textarea id="sdp-output" readonly bind:value={sdpOutput} />
-    <label for="sdp-input">SDP Input</label>
-    <textarea id="sdp-input" bind:value={sdpInput} />
-    <label for="ice-output">ICE Output</label>
-    <textarea id="ice-output" readonly bind:value={iceOutput} />
-    <label for="ice-input">ICE Input</label>
-    <textarea id="ice-input" bind:value={iceInput} />
+    <OutputTextArea bind:output={sdpOutput} label="SDP Output" />
+    <InputTextArea bind:input={sdpInput} label="SDP Input" />
+    <OutputTextArea bind:output={iceOutput} label="ICE Output" />
+    <InputTextArea bind:input={iceInput} label="ICE Input" />
   </div>
 </main>
 
 <style>
-  #my-video,
-  #other-video {
+  video {
     width: 40%;
-  }
-
-  #sdp-output,
-  #sdp-input,
-  #ice-output,
-  #ice-input {
-    max-width: 100%;
-    width: 100%;
-    height: 10em;
   }
 </style>
