@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
+
   import ClientList from "./ClientList.svelte";
   import InputTextArea from "./InputTextArea.svelte";
+  import { initWebRTC, offerSDP, receiveSDP, receiveICE } from "./webrtc";
   import OutputTextArea from "./OutputTextArea.svelte";
-  import { initWebRTC } from "./webrtc";
   import { setupWebSocket } from "./ws";
 
   let myVideo: HTMLVideoElement;
@@ -47,33 +48,22 @@
     }
   });
 
-  const offerSDP = async (): Promise<void> => {
-    if (peer === null) return;
-    const sessionDesc = await peer.createOffer({
-      offerToReceiveVideo: true,
-    });
-    await peer.setLocalDescription(sessionDesc);
-    sdpOutput = JSON.stringify(sessionDesc, null, 2);
+  const noop = () => {};
+
+  const setSdpOutput = (output: string) => {
+    sdpOutput = output;
   };
 
-  const receiveSDP = async (): Promise<void> => {
-    if (peer === null) return;
-    const sessionDesc = JSON.parse(sdpInput);
-    await peer.setRemoteDescription(sessionDesc);
-    if (sessionDesc.type === "offer") {
-      const newSessionDesc = await peer.createAnswer();
-      await peer.setLocalDescription(newSessionDesc);
-      sdpOutput = JSON.stringify(newSessionDesc, null, 2);
-    }
-  };
+  $: handleOfferSDP = peer ? offerSDP(peer, setSdpOutput) : noop;
 
-  const receiveICE = async (): Promise<void> => {
-    if (peer === null) return;
-    const candidates: RTCIceCandidateInit[] = JSON.parse(iceInput);
-    for (const candidate of candidates) {
-      await peer.addIceCandidate(candidate);
-    }
-  };
+  $: handleReceiveSDP = peer
+    ? receiveSDP(peer, {
+        sdpOutput: setSdpOutput,
+        sdpInput: () => sdpInput,
+      })
+    : noop;
+
+  $: handleReceiveICE = peer ? receiveICE(peer, () => iceInput) : noop;
 </script>
 
 <main>
@@ -82,9 +72,9 @@
     on:clientSelected={(ev) => console.log("Client selected:", ev.detail)}
   />
   <div>
-    <button on:click={offerSDP}>Offer SDP</button>
-    <button on:click={receiveSDP}>Receive SDP</button>
-    <button on:click={receiveICE}>Receive ICE</button>
+    <button on:click={handleOfferSDP}>Offer SDP</button>
+    <button on:click={handleReceiveSDP}>Receive SDP</button>
+    <button on:click={handleReceiveICE}>Receive ICE</button>
   </div>
   <video autoplay bind:this={myVideo}>
     <track kind="captions" />
