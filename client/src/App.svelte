@@ -1,14 +1,20 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   import ClientList from "./ClientList.svelte";
   import InputTextArea from "./InputTextArea.svelte";
   import { initWebRTC, offerSDP, receiveSDP, receiveICE } from "./webrtc";
   import OutputTextArea from "./OutputTextArea.svelte";
   import { setupWebSocket } from "./ws";
+  import { clientsStore } from "./store";
 
   let myVideo: HTMLVideoElement;
   let otherVideo: HTMLVideoElement;
+
+  let clients: string[];
+  const unsubscribe = clientsStore.subscribe((val) => {
+    clients = val;
+  });
 
   let sdpOutput = "";
   let sdpInput = "";
@@ -48,6 +54,10 @@
     }
   });
 
+  onDestroy(() => {
+    unsubscribe();
+  });
+
   const noop = () => {};
 
   const setSdpOutput = (output: string) => {
@@ -68,7 +78,7 @@
 
 <main>
   <ClientList
-    clients={["aaa", "bbb", "ccc"]}
+    {clients}
     on:clientSelected={(ev) => console.log("Client selected:", ev.detail)}
   />
   <div>
