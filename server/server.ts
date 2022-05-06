@@ -47,6 +47,7 @@ const reqHandler: Handler = (req) => {
   });
 
   evt.$attach(to("login"), ctx, (uuid) => {
+    if (uuid === myUUID) return;
     ws.send(JSON.stringify({ type: "login", uuid }));
   });
 
