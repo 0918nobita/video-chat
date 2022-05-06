@@ -8,6 +8,9 @@
   import { setupWebSocket } from "./ws";
   import { clientsStore } from "./store";
 
+  let peer: RTCPeerConnection;
+  let ws: WebSocket;
+
   let myVideo: HTMLVideoElement;
   let otherVideo: HTMLVideoElement;
 
@@ -20,8 +23,6 @@
   let sdpInput = "";
   let iceOutput = "";
   let iceInput = "";
-
-  let peer: RTCPeerConnection | null = null;
 
   const iceCandidates: RTCIceCandidate[] = [];
 
@@ -41,7 +42,7 @@
     peer.addEventListener("icecandidate", handleICECandidate);
     peer.addEventListener("track", handleTrack);
 
-    setupWebSocket();
+    ws = setupWebSocket();
 
     const mediaStream = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -74,13 +75,17 @@
     : noop;
 
   $: handleReceiveICE = peer ? receiveICE(peer, () => iceInput) : noop;
+
+  $: clientSelected = ws
+    ? (ev: CustomEvent<string>) => {
+        console.log("Outgoing call to:", ev.detail);
+        ws.send(JSON.stringify({ type: "outgoing-call", to: ev.detail }));
+      }
+    : noop;
 </script>
 
 <main>
-  <ClientList
-    {clients}
-    on:clientSelected={(ev) => console.log("Client selected:", ev.detail)}
-  />
+  <ClientList {clients} on:clientSelected={clientSelected} />
   <div>
     <button on:click={handleOfferSDP}>Offer SDP</button>
     <button on:click={handleReceiveSDP}>Receive SDP</button>
