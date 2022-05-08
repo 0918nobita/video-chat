@@ -1,6 +1,12 @@
 import { Evt, to } from "https://deno.land/x/evt@v1.10.2/mod.ts";
+import * as t from "https://esm.sh/io-ts@2.2.16";
 
 import { accountEvent } from "./accountEvent.ts";
+
+const outgoingCallMessage = t.type({
+  type: t.literal("outgoing-call"),
+  uuid: t.string,
+});
 
 export const upgradeWS = (req: Request): Response => {
   if (req.headers.get("upgrade") !== "websocket")
