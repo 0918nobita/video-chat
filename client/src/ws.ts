@@ -35,7 +35,7 @@ const Message = t.union([
 type Message = t.TypeOf<typeof Message>;
 
 export const setupWebSocket = (): WebSocket => {
-  const ws = new WebSocket("ws://localhost:8080");
+  const ws = new WebSocket("ws://localhost:8080/ws");
 
   ws.addEventListener("message", (event) => {
     pipe(
