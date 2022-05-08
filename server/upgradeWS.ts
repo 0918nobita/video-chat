@@ -5,7 +5,7 @@ import { accountEvent } from "./accountEvent.ts";
 
 const outgoingCallMessage = t.type({
   type: t.literal("outgoing-call"),
-  uuid: t.string,
+  to: t.string,
 });
 
 export const upgradeWS = (req: Request): Response => {
